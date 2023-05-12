@@ -18,7 +18,7 @@ class ParserMailSubjectTest extends TestCase
 
         // alborodin85@mail.ru
         $string = '=?UTF-8?Q?=D0=9A=D0=BE=D1=80=D0=BE=D1=82=D0=BA=D0=B0=D1=8F_?=? =?UTF-8?Q?=D1=82=D0=B5=D0=BC=D0=B0?=';
-        $expected = 'Короткая тема...';
+        $expected = 'Короткая тема';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
@@ -38,7 +38,7 @@ class ParserMailSubjectTest extends TestCase
         $this->assertEquals($expected, $result);
 
         $string = '=?UTF-8?Q?=D0=9F=D0=BE=D0=BB=D1=83_=D1=80=D1=83=D1=81=D1=81?=? =?UTF-8?Q?=D0=BA=D0=B8=D0=B9_Vasa=3B_1223=24=3B_=5F=5F_=3A_99?=';
-        $expected = 'Полу русский Vasa; 1223$;    : 99...';
+        $expected = 'Полу русский Vasa; 1223$; : 99';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
@@ -48,17 +48,17 @@ class ParserMailSubjectTest extends TestCase
         $this->assertEquals($expected, $result);
 
         $string = '=?UTF-8?Q?=D0=A0=D1=83=D1=81=D1=81=D0=BA=D0=B8=D0=B5Vasa123?=? =?UTF-8?Q?=D0=A0=D1=83=D1=81=D1=81=D0=BA34?=';
-        $expected = 'РусскиеVasa123Русск34...';
+        $expected = 'РусскиеVasa123Русск34';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
         $string = 'Only eng and 8787;';
-        $expected = 'Only eng and 8787;...';
+        $expected = 'Only eng and 8787;';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
         $string = '=?UTF-8?Q?=3C=D0=B1=D0=B5=D0=B7_=D1=82=D0=B5=D0=BC=D1=8B=3E?=';
-        $expected = '<без темы>...';
+        $expected = '<без темы>';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
@@ -67,8 +67,8 @@ class ParserMailSubjectTest extends TestCase
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 
-        $string = '=?UTF-8?Q?=3C=D0=B1=D0=B5=D0=B7_=D1=82=D0=B5=D0=BC=D1=8B=3E?=? any text';
-        $expected = '<без темы>any text...';
+        $string = '=?UTF-8?Q?=3C=D0=B1=D0=B5=D0=B7_=D1=82=D0=B5=D0=BC=D1=8B=3E?=? any     text';
+        $expected = '<без темы> any text';
         $result = $mailSubjectConverter->convert($string);
         $this->assertEquals($expected, $result);
 

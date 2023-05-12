@@ -4,6 +4,17 @@ namespace App;
 
 class ParserQueuePayload
 {
+    public function parseQueuesArray(array $queuesArray): array
+    {
+        $mailsArray = [];
+        foreach ($queuesArray as $queueItem) {
+            $mails = $this->buildMailMessage($queueItem);
+            $mailsArray = array_merge($mailsArray, $mails);
+        }
+
+        return $mailsArray;
+    }
+
     public function buildMailMessage(EntityQueueItem $queueItem): array
     {
         $payload = $queueItem->payload;
@@ -35,7 +46,7 @@ class ParserQueuePayload
         // header Subject: success message with copy from mx.it5.su[91.223.89.239]; from=<borodin_admin@ml.it5.su> to=<hiddencopy@rersre.sfds> proto=ESMTP helo=<mx.it5.su>\n
         // header Subject: =?UTF-8?Q?=D0=9F=D0=B8=D1=81=D1=8C=D0=BC=D0=BE_=D1=81_=D1=82?=? =?UTF-8?Q?=D0=B5=D0=BC=D0=BE=D0=B9_=D0=BD=D0=B0_=D1=80=D1=83=D1=81=D1=81?=? =?UTF-8?Q?=D0=BA=D0=BE=D0=BC_=D1=8F=D0=B7=D1=8B=D0= from mx.it5.su[91.223.89.239]; from=<borodin_admin@ml.it5.su> to=<ady@infoservice.ru> proto=ESMTP helo=<mx.it5.su>\n
         $subjectMatches = [];
-        $subjectPattern = '/.*?Subject: (.*?) from .*?\[.*?];.*/m';
+        $subjectPattern = '/.*?Subject: (.*?) from .*?;.*/mu';
         $subjectResult = preg_match($subjectPattern, $payload, $subjectMatches);
         $subject = '';
         $mailSubjectConverter = new ParserMailSubject();

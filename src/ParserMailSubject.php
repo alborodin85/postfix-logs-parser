@@ -18,7 +18,7 @@ class ParserMailSubject
             $encodedPattern = '/=\?(.+?)\?(.+?)\?(.*)/';
             $encodedResult = preg_match($encodedPattern, $sourceItem);
             if (!$encodedResult) {
-                $clearedItems[] = $sourceItem . ' ';
+                $clearedItems[] = ' ' . $sourceItem . ' ';
                 continue;
             }
             // Если заканчивается как и должно
@@ -46,6 +46,7 @@ class ParserMailSubject
         $decodedItemsArray = array_map(fn(string $item) => mb_decode_mimeheader($item), $clearedItems);
         $decodedItemsString = implode('', $decodedItemsArray);
         $decodedItemsString = str_replace('_', ' ', $decodedItemsString);
+        $decodedItemsString = preg_replace('/ {2,}/', ' ', $decodedItemsString);
         $decodedItemsString = trim($decodedItemsString);
 
         $letterArray = mb_str_split($decodedItemsString);
@@ -57,13 +58,12 @@ class ParserMailSubject
             }
         }
 
-        $decodedItemsString = mb_substr($decodedItemsString, 0, $i+2);
+        $decodedItemsString = mb_substr($decodedItemsString, 0, $i + 2);
 
         if ($isBrokenString) {
             $decodedItemsString = mb_substr($decodedItemsString, 0, -1);
+            $decodedItemsString .= '...';
         }
-
-        $decodedItemsString .= '...';
 
         return $decodedItemsString;
     }

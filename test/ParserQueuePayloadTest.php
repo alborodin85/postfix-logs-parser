@@ -33,7 +33,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'ady@infoservice.ru',
-            subject: 'success message...',
+            subject: 'success message',
             statusText: '250 2.0.0 Ok: queued on mail-nwsmtp-mxfront-production-main-10.myt.yp-c.yandex.net 1682952938-btNFgWJPMCg0-4gaCVu2s',
             statusCode: 250,
             statusName: 'sent',
@@ -41,6 +41,9 @@ class ParserQueuePayloadTest extends TestCase
         );
 
         $this->assertEquals($expected, $result);
+
+        $result = $parserQueuePayload->parseQueuesArray([$queueItem]);
+        $this->assertEquals([$expected], $result);
     }
 
     public function testSuccessMultyRecipients()
@@ -78,7 +81,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'lumumba@fdlsd.ts',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: 'Host or domain name not found. Name service error for name=fdlsd.ts type=A: Host not found',
             statusCode: 0,
             statusName: 'bounced',
@@ -90,7 +93,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'hiddencopy@rersre.sfds',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: 'Host or domain name not found. Name service error for name=rersre.sfds type=A: Host not found',
             statusCode: 0,
             statusName: 'bounced',
@@ -102,7 +105,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'adyanul@mail.ru',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: '250 OK id=1ptY0i-009HgJ-1h',
             statusCode: 250,
             statusName: 'sent',
@@ -114,7 +117,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'alborodin85@mail.ru',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: '250 OK id=1ptY0i-009HgJ-1h',
             statusCode: 250,
             statusName: 'sent',
@@ -126,7 +129,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'notegsdf@mail.ru',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: '250 OK id=1ptY0i-009HgJ-1h',
             statusCode: 250,
             statusName: 'sent',
@@ -138,7 +141,7 @@ class ParserQueuePayloadTest extends TestCase
             queueId: $queueId,
             from: 'borodin_admin@ml.it5.su',
             to: 'ady@infoservice.ru',
-            subject: 'success message with copy...',
+            subject: 'success message with copy',
             statusText: '250 2.0.0 Ok: queued on mail-nwsmtp-mxfront-production-main-16.vla.yp-c.yandex.net 1682964748-RCRUwjJPKCg0-6CAMm4HS',
             statusCode: 250,
             statusName: 'sent',

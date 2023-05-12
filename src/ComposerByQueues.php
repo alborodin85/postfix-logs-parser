@@ -12,6 +12,9 @@ class ComposerByQueues
     {
         $queueRows = [];
         foreach ($logRows as $logRow) {
+            if ($logRow->queueId == 'NOQUEUE') {
+                continue;
+            }
             if ($logRow->queueId) {
                 $queueRows[$logRow->queueId][] = $logRow;
             }

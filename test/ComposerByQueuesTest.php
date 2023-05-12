@@ -22,7 +22,7 @@ class ComposerByQueuesTest extends TestCase
         $logRows = [];
         $rowsParser = new ParserRows();
         foreach ($lines as $sourceLine) {
-            $logRows[] = $rowsParser->parse($sourceLine);
+            $logRows[] = $rowsParser->parseLine($sourceLine);
         }
 
         $composer = new ComposerByQueues();
@@ -57,7 +57,7 @@ class ComposerByQueuesTest extends TestCase
         $logRows = [];
         $rowsParser = new ParserRows();
         foreach ($lines as $sourceLine) {
-            $logRows[] = $rowsParser->parse($sourceLine);
+            $logRows[] = $rowsParser->parseLine($sourceLine);
         }
 
         $composer = new ComposerByQueues();
@@ -93,7 +93,7 @@ class ComposerByQueuesTest extends TestCase
         $logRows = [];
         $rowsParser = new ParserRows();
         foreach ($lines as $sourceLine) {
-            $logRows[] = $rowsParser->parse($sourceLine);
+            $logRows[] = $rowsParser->parseLine($sourceLine);
         }
 
         $composer = new ComposerByQueues();
@@ -113,5 +113,22 @@ class ComposerByQueuesTest extends TestCase
         $expected = new EntityQueueItem(0, $expectedDate, $expectedQueueId, $expectedPayload);
 
         $this->assertEquals($expected, $result);
+    }
+
+    public function testNoQueues()
+    {
+        $lines = [];
+        $lines[] = 'May 11 22:02:26 mx postfix/smtpd[423568]: NOQUEUE: reject: RCPT from unknown[189.154.202.217]: 454 4.7.1 <test@hostxbay.com>: Relay access denied; from=<nouth@mx.it5.su> to=<test@hostxbay.com> proto=ESMTP helo=<INMOBILIARIA>';
+
+        $logRows = [];
+        $rowsParser = new ParserRows();
+        foreach ($lines as $sourceLine) {
+            $logRows[] = $rowsParser->parseLine($sourceLine);
+        }
+
+        $composer = new ComposerByQueues();
+        [$result] = $composer->buildQueues($logRows);
+
+        $this->assertNull($result);
     }
 }

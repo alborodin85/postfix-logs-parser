@@ -4,7 +4,35 @@ namespace App;
 
 class ParserRows
 {
-    public function parse(string $sourceLine): EntityLogRow
+    public function parseArray(array $sourceLinesArray): array
+    {
+        $logRows = [];
+        foreach ($sourceLinesArray as $sourceLine) {
+            $logRow = $this->parseLine($sourceLine);
+            $logRows[] = $logRow;
+        }
+
+        return $logRows;
+    }
+
+    public function parseFile(string $fileName): array
+    {
+        $logFile = fopen($fileName, 'r+t');
+        $logRows = [];
+        while (!feof($logFile)) {
+            $sourceLine = fgets($logFile);
+            $sourceLine = trim($sourceLine);
+            if (!$sourceLine) {
+                continue;
+            }
+            $logRow = $this->parseLine($sourceLine);
+            $logRows[] = $logRow;
+        }
+
+        return $logRows;
+    }
+
+    public function parseLine(string $sourceLine): EntityLogRow
     {
         $allocatedMessageMatches = [];
         $allocatedMessagePattern = '/(\w* \d{2} \d{2}:\d{2}:\d{2}) (\S*) (.*?)\[(\d*)]: (.*)/s';
@@ -34,7 +62,7 @@ class ParserRows
         $rowText = $message;
 
         $queueErrorMatches = [];
-        $queueErrorPattern = '/(\w*): (panic|fatal|error|warning|statistics): (.*)/s';
+        $queueErrorPattern = '/(\w*): (panic|fatal|error|warning|statistics|reject): (.*)/s';
         $queueErrorResult = preg_match($queueErrorPattern, $message, $queueErrorMatches);
         $result = $queueErrorResult;
 
@@ -46,7 +74,7 @@ class ParserRows
 
         if (!$result) {
             $errorLevelMatches = [];
-            $errorLevelPattern = '/(panic|fatal|error|warning|statistics): (.*)/s';
+            $errorLevelPattern = '/(panic|fatal|error|warning|statistics|reject): (.*)/s';
             $errorLevelResult = preg_match($errorLevelPattern, $message, $errorLevelMatches);
             $result = $errorLevelResult;
             if ($result) {
