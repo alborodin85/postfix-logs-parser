@@ -2,9 +2,33 @@
 
 namespace App\RestApi;
 
-class RestApiRequest
+class ServiceRestApiRequest
 {
-    public function makeCurlPostRequest(string $url, array $arFields): EntityResponse
+    public function __construct(
+        private readonly string $webPathSchema,
+        private readonly string $webPathDomain,
+        private readonly string $endpointApiToken,
+    ) {
+        //
+    }
+
+    public function post(string $endPoint, array $arFields): EntityResponse
+    {
+        $url = $this->webPathSchema . '://' . $this->webPathDomain;
+        if (str_starts_with($endPoint, '/')) {
+            $url .= $endPoint;
+        } else {
+            $url .= '/' . $endPoint;
+        }
+
+        $arFields['endpoint_api_token'] = $this->endpointApiToken;
+
+        $entityResponse = $this->makeCurlPostRequest($url, $arFields);
+
+        return $entityResponse;
+    }
+
+    private function makeCurlPostRequest(string $url, array $arFields): EntityResponse
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);

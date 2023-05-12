@@ -2,18 +2,28 @@
 
 namespace Test;
 
+use App\RestApi\EntityRequestAddRecords;
 use App\RestApi\EntityResponse;
-use App\RestApi\RestApiRequest;
+use App\RestApi\EntityResponseGetLastArchive;
+use App\RestApi\ServiceRestApiRequest;
 use PHPUnit\Framework\TestCase;
 
 class WebApiRequestTest extends TestCase
 {
+    private ServiceRestApiRequest $serviceRestApiRequest;
+
+    public function setUp(): void
+    {
+        $this->serviceRestApiRequest = new \App\RestApi\ServiceRestApiRequest(
+            $_ENV['WEB_PATH_SCHEMA'], $_ENV['WEB_PATH_DOMAIN'], $_ENV['ENDPOINT_API_TOKEN']
+        );
+    }
+
     public function testNormalJson()
     {
-        $restApiRequest = new RestApiRequest();
-        $url = $_ENV['WEB_PATH_SCHEMA'] . '://' . $_ENV['WEB_PATH_DOMAIN'] . '/api/return-response';
-        $fields = ['endpoint_api_token' => $_ENV['ENDPOINT_API_TOKEN'], 'test-field-name' => 'test-field-value'];
-        $result = $restApiRequest->makeCurlPostRequest($url, $fields);
+        $result = $this->serviceRestApiRequest->post(
+            $_ENV['ENDPOINT_RETURN_RESPONSE'], ['test-field-name' => 'test-field-value']
+        );
 
         $expected = new EntityResponse(
             payload: ['test-field-name' => 'test-field-value', 'endpoint_api_token' => $_ENV['ENDPOINT_API_TOKEN']],
@@ -24,14 +34,20 @@ class WebApiRequestTest extends TestCase
         );
 
         $this->assertEquals($expected, $result);
+
+        $endpoint = mb_substr($_ENV['ENDPOINT_RETURN_RESPONSE'], 1, mb_strlen($_ENV['ENDPOINT_RETURN_RESPONSE'])-1);
+        $result = $this->serviceRestApiRequest->post(
+            $endpoint, ['test-field-name' => 'test-field-value']
+        );
+
+        $this->assertEquals($expected, $result);
     }
 
     public function testHtmlResult()
     {
-        $restApiRequest = new RestApiRequest();
-        $url = $_ENV['WEB_PATH_SCHEMA'] . '://' . $_ENV['WEB_PATH_DOMAIN'] . '/api/return-response';
-        $fields = ['endpoint_api_token' => $_ENV['ENDPOINT_API_TOKEN'], 'throwHtml' => 1];
-        $result = $restApiRequest->makeCurlPostRequest($url, $fields);
+        $result = $this->serviceRestApiRequest->post(
+            $_ENV['ENDPOINT_RETURN_RESPONSE'], ['throwHtml' => 1]
+        );
 
         $expected = new EntityResponse(
             payload: '<!DOCTYPE html><html lang="en"><head><title>Title</title></head></html>',
@@ -46,10 +62,13 @@ class WebApiRequestTest extends TestCase
 
     public function testCurlError()
     {
-        $restApiRequest = new RestApiRequest();
-        $url = $_ENV['WEB_PATH_SCHEMA'] . '://' . 'not-exists-domain' . '/api/return-response';
-        $fields = ['endpoint_api_token' => $_ENV['ENDPOINT_API_TOKEN'], 'throwError' => 1];
-        $result = $restApiRequest->makeCurlPostRequest($url, $fields);
+        $restApiRequest = new ServiceRestApiRequest(
+            $_ENV['WEB_PATH_SCHEMA'], 'not-exists-domain', $_ENV['ENDPOINT_API_TOKEN']
+        );
+
+        $result = $restApiRequest->post(
+            $_ENV['ENDPOINT_RETURN_RESPONSE'], []
+        );
 
         $expected = new EntityResponse(
             payload: false,
@@ -64,10 +83,9 @@ class WebApiRequestTest extends TestCase
 
     public function testEmptyResponse()
     {
-        $restApiRequest = new RestApiRequest();
-        $url = $_ENV['WEB_PATH_SCHEMA'] . '://' . $_ENV['WEB_PATH_DOMAIN'] . '/api/return-response';
-        $fields = ['endpoint_api_token' => $_ENV['ENDPOINT_API_TOKEN'], 'throwEmpty' => 1];
-        $result = $restApiRequest->makeCurlPostRequest($url, $fields);
+        $result = $this->serviceRestApiRequest->post(
+            $_ENV['ENDPOINT_RETURN_RESPONSE'], ['throwEmpty' => 1]
+        );
 
         $expected = new EntityResponse(
             payload: '',
@@ -82,10 +100,13 @@ class WebApiRequestTest extends TestCase
 
     public function testEmptyApiToken()
     {
-        $restApiRequest = new RestApiRequest();
-        $url = $_ENV['WEB_PATH_SCHEMA'] . '://' . $_ENV['WEB_PATH_DOMAIN'] . '/api/return-response';
-        $fields = [];
-        $result = $restApiRequest->makeCurlPostRequest($url, $fields);
+        $restApiRequest = new ServiceRestApiRequest(
+            $_ENV['WEB_PATH_SCHEMA'], $_ENV['WEB_PATH_DOMAIN'], ''
+        );
+
+        $result = $restApiRequest->post(
+            $_ENV['ENDPOINT_RETURN_RESPONSE'], []
+        );
 
         $expected = new EntityResponse(
             payload: '',
@@ -97,5 +118,27 @@ class WebApiRequestTest extends TestCase
 
         $this->assertEquals($expected->httpCode, $result->httpCode);
         $this->assertEquals($expected->errorText, $result->errorText);
+    }
+
+    public function testEntityRequestAddRecords()
+    {
+        $entityRequestAddRecords = new EntityRequestAddRecords(['record']);
+        $expected = ['records' => ['record']];
+        $this->assertEquals($expected, $entityRequestAddRecords->toArFields());
+    }
+
+    public function testEntityResponseGetLastArchive()
+    {
+        $entityResponse = new EntityResponse(
+            payload: 'last-archive-name',
+            errorCode: 0,
+            httpCode: 200,
+            errorModule: '',
+            errorText: ''
+        );
+
+        $entityResponseGetLastArchive = new EntityResponseGetLastArchive($entityResponse);
+
+        $this->assertEquals('last-archive-name', $entityResponseGetLastArchive->lastArchiveFileName);
     }
 }
