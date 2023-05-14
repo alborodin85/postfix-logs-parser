@@ -31,24 +31,40 @@ $composerByQueues = new \App\ComposerByQueues();
 $parserQueuePayload = new \App\ParserQueuePayload();
 
 $allMailsArray = [];
+$addedArchives = [];
 foreach ($allArchives as $archiveName) {
     if ($archiveName <= $lastArchiveFileName) {
         continue;
     }
     $sourceLinesArray = gzfile($archiveName);
     $logRows = $rowParser->parseArray($sourceLinesArray);
+
+    $chunkedLogRowsArray = array_chunk($logRows, (int)$_ENV['ADD_RECORDS_CHUNK_SIZE']*100);
+    foreach ($chunkedLogRowsArray as $chunk) {
+        usleep(100000);
+        $entityRequestAddRecords = new \App\RestApi\EntityRequestAddRecords($chunk);
+        $serviceRestApiRequest->post($_ENV['ENDPOINT_ADD_ARCHIVE_LOG_ROWS'], $entityRequestAddRecords->toArFields());
+    }
+
     $queuesArray = $composerByQueues->buildQueues($logRows);
     $mailsArray = $parserQueuePayload->parseQueuesArray($queuesArray);
     $allMailsArray = array_merge($allMailsArray, $mailsArray);
+    $addedArchives[] = $archiveName;
 }
 
 $chunkedMailsArray = array_chunk($allMailsArray, (int)$_ENV['ADD_RECORDS_CHUNK_SIZE']);
 foreach ($chunkedMailsArray as $chunk) {
+    usleep(100000);
     $entityRequestAddRecords = new \App\RestApi\EntityRequestAddRecords($chunk);
-    $serviceRestApiRequest->post($_ENV['ENDPOINT_ADD_ARCHIVE_RECORDS'], $entityRequestAddRecords->toArFields());
+    $serviceRestApiRequest->post($_ENV['ENDPOINT_ADD_ARCHIVE_EMAILS'], $entityRequestAddRecords->toArFields());
 }
 
-var_export($allMailsArray);
+$requestData = [
+    'archivesNames' => $addedArchives,
+];
+$serviceRestApiRequest->post($_ENV['ENDPOINT_ADD_ARCHIVE_NAMES'], $requestData);
+
+//var_export($allMailsArray);
 echo "\n";
 
 echo 'end';
