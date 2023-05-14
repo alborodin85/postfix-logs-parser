@@ -90,7 +90,7 @@ class WebApiRequestTest extends TestCase
         $expected = new EntityResponse(
             payload: '',
             errorCode: 500,
-            httpCode: 200,
+            httpCode: 204,
             errorModule: 'curl_error',
             errorText: 'пустой ответ сервера'
         );
