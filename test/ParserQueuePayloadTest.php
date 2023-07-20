@@ -151,7 +151,7 @@ class ParserQueuePayloadTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testSuccessWhithRussianSubject()
+    public function testSuccessWithRussianSubject()
     {
         $currentYear = date('Y');
         $dateTime = "$currentYear-05-01 20:01:01";
@@ -176,6 +176,40 @@ class ParserQueuePayloadTest extends TestCase
             from: 'borodin_admin@ml.it5.su',
             to: 'ady@infoservice.ru',
             subject: 'Письмо с темой на русском язы...',
+            statusText: '250 2.0.0 Ok: queued on mail-nwsmtp-mxfront-production-main-88.vla.yp-c.yandex.net 1682971262-21Tnj9KYVeA0-Z8z70YDe',
+            statusCode: 250,
+            statusName: 'sent',
+            nonDeliveryNotificationId: '',
+        );
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testLongRussianSubject()
+    {
+        $currentYear = date('Y');
+        $dateTime = "$currentYear-05-01 20:01:01";
+        $queueId = 'EDE0212011A';
+        $payload = "client=mx.it5.su[91.223.89.239], sasl_method=LOGIN, sasl_username=borodin_admin@ml.it5.su\n";
+        $payload .= "header Subject: =?UTF-8?Q?=D0=9F=D0=BE=D1=81=D0=BB=D0=B5=D0=B4=D0=BD=D0=B5=D0=B5?=? =?UTF-8?Q?_=D0=BF=D0=B8=D1=81=D1=8C=D0=BC=D0=BE_=D1=81_=D0=B4=D0=BB=D0=B8?=? =?UTF-8?Q?=D0=BD=D0=BD=D0=BE=D0=B9_=D1=82=D0=B from mx.it5.su[91.223.89.239]; from=<all@ml.it5.su> to=<adyanul@mail.ru> proto=ESMTP helo=<mx.it5.su>: =?UTF-8?Q?=D0=9F=D0=BE=D1=81=D0=BB=D0=B5=D0=B4=D0=BD=D0=B5=D0=B5?=? =?UTF-8?Q?_=D0=BF=D0=B8=D1=81=D1=8C=D0=BC=D0=BE_=D1=81_=D0=B4=D0=BB=D0=B8?=? =?UTF-8?Q?=D0=BD=D0=BD=D0=BE=D0=B9_=D1=82=D0=B5=D0=BC=D0=BE=D0=B9_=D1=87?=? =?UTF-8?Q?=D1=82=D0=BE=D0=B1=D1=8B_=D0=BF=D1=80=D0=BE=D0=B2=D0=B5=D1=80?=? =?UTF-8?Q?=D0=B8=D1=82=D1=8C_=D0=BA=D0=B0=D0=BA_=D0=BF=D0=BE=D0=BF=D0=B0?=? =?UTF-8?Q?=D0=B4=D0=B0=D0=B5=D1=82_=D0=B2_=D1=81=D0=B8=D1=81=D1=82=D0=B5?=? =?UTF-8?Q?=D0=BC=D1=83_=D1=81=D1=82=D0=B0=D1=82=D0=B8=D1=81=D1=82=D0=B8?=? =?UTF-8?Q?=D0=BA=D0=B8_=D0=B8_=D0=BF=D1=80=D0=BE=D0=B2=D0=B5=D1=80=D0=BA?=? =?UTF-8?Q?=D0=B8=2C_=D1=87=D1=82=D0=BE_=D0=BF=D1=80=D0=B8=D1=85=D0=BE?=? =?UTF-8?Q?=D0=B4=D0=B8=D1=82=2C__=D1=87=D1=82=D0=BE_=D1=83=D1=85=D0=BE?=? =?UTF-8?Q?=D0=B4=D0=B8=D1=82_=D0=B2=D0=BE=D0=BE=D0=B1=D1=89=D0=B5?=\n";
+        $payload .= "message-id=<c05b71bd1968aa4cfe31c0169f66227f@ml.it5.su>\n";
+        $payload .= "from=<borodin_admin@ml.it5.su>, size=817, nrcpt=1 (queue active)\n";
+        $payload .= "to=<ady@infoservice.ru>, relay=mx.yandex.ru[77.88.21.249]:25, delay=0.9, delays=0.13/0.03/0.15/0.59, dsn=2.0.0, status=sent (250 2.0.0 Ok: queued on mail-nwsmtp-mxfront-production-main-88.vla.yp-c.yandex.net 1682971262-21Tnj9KYVeA0-Z8z70YDe)\n";
+        $payload .= "removed";
+
+        $queueItem = new EntityQueueItem(0, $dateTime, $queueId, $payload);
+
+        $parserQueuePayload = new ParserQueuePayload();
+
+        [$result] = $parserQueuePayload->buildMailMessage($queueItem);
+
+        $expected = new EntityMailMessage(
+            id: 0,
+            dateTime: $dateTime,
+            queueId: $queueId,
+            from: 'borodin_admin@ml.it5.su',
+            to: 'ady@infoservice.ru',
+            subject: 'Последнее письмо с длинной темой чтобы проверить как попадает в систему статистики и проверки, что приходит, что уходит вообще',
             statusText: '250 2.0.0 Ok: queued on mail-nwsmtp-mxfront-production-main-88.vla.yp-c.yandex.net 1682971262-21Tnj9KYVeA0-Z8z70YDe',
             statusCode: 250,
             statusName: 'sent',

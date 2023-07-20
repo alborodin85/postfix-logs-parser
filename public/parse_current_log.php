@@ -1,3 +1,4 @@
+#!/usr/bin/php8.2
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
